@@ -11,13 +11,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Random;
 import java.util.UUID;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    private static String productCodeAvailable;
+    private static Reward reward;
     private static Settings settings;
     public static void main(String[] args) throws IOException, InterruptedException {
         initializeBrowser();
@@ -25,40 +22,45 @@ public class Main {
         getDailyReward();
     }
     private static void getDailyReward() throws IOException, InterruptedException {
+        if (!reward.data().items().isEmpty()) {
+            String item = reward.data().items().getFirst().product_code();
+            StringBuilder requestBody = new StringBuilder();
+            requestBody
+                    .append("{\"product_code\":\"")
+                    .append(item)
+                    .append("\",\"language\":\"ru\",\"transaction_id\":\"")
+                    .append(UUID.randomUUID())
+                    .append("\",\"expected_prices\":[{\"code\":\"gold\",\"amount\":\"0\",\"item_type\":\"currency\"}]}");
 
-        StringBuilder requestBody = new StringBuilder();
-        requestBody
-                .append("{\"product_code\":\"")
-                .append(productCodeAvailable)
-                .append("\",\"language\":\"ru\",\"transaction_id\":\"")
-                .append(UUID.randomUUID())
-                .append("\",\"expected_prices\":[{\"code\":\"gold\",\"amount\":\"0\",\"item_type\":\"currency\"}]}");
+            String uri = "https://tanki.su/wotup/claim_product/purchase_product_vc/";
+            String referer = "https://tanki.su/ru/daily-check-in/?utm_campaign=wot-wgcc&utm_medium=link&utm_source=global-nav";
+            HttpClient client = HttpClient.newHttpClient();
 
-        String uri = "https://tanki.su/wotup/claim_product/purchase_product_vc/";
-        String referer = "https://tanki.su/ru/daily-check-in/?utm_campaign=wot-wgcc&utm_medium=link&utm_source=global-nav";
-        HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .setHeader("Authority", settings.authority())
+                    .setHeader("Accept", settings.accept())
+                    .setHeader("Accept-Language", settings.acceptLanguage())
+                    .setHeader("Content-Type", settings.contentType())
+                    .setHeader("Cookie", settings.cookie())
+                    .setHeader("Origin", settings.origin())
+                    .setHeader("Referer", referer)
+                    .setHeader("Sec-Ch-Ua", settings.secChUa())
+                    .setHeader("Sec-Ch-Ua-Mobile", settings.secChUaMobile())
+                    .setHeader("Sec-Ch-Ua-Platform", settings.secChUaPlatform())
+                    .setHeader("Sec-Fetch-Dest", settings.secFetchDest())
+                    .setHeader("Sec-Fetch-Mode", settings.secFetchMode())
+                    .setHeader("Sec-Fetch-Site", settings.secFetchSite())
+                    .setHeader("User-Agent", settings.userAgent())
+                    .uri(URI.create(uri))
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                    .build();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .setHeader("Authority", settings.authority())
-                .setHeader("Accept", settings.accept())
-                .setHeader("Accept-Language", settings.acceptLanguage())
-                .setHeader("Content-Type", settings.contentType())
-                .setHeader("Cookie", settings.cookie())
-                .setHeader("Origin", settings.origin())
-                .setHeader("Referer", referer)
-                .setHeader("Sec-Ch-Ua", settings.secChUa())
-                .setHeader("Sec-Ch-Ua-Mobile", settings.secChUaMobile())
-                .setHeader("Sec-Ch-Ua-Platform", settings.secChUaPlatform())
-                .setHeader("Sec-Fetch-Dest", settings.secFetchDest())
-                .setHeader("Sec-Fetch-Mode", settings.secFetchMode())
-                .setHeader("Sec-Fetch-Site", settings.secFetchSite())
-                .setHeader("User-Agent", settings.userAgent())
-                .uri(URI.create(uri))
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.body());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
+        }
+        else {
+            System.out.println("Доступных наград нет!");
+        }
     }
     private static void findAnAvailableReward() throws IOException, InterruptedException {
 
@@ -102,6 +104,6 @@ public class Main {
     }
     private static void getProductCode(String responseBody) {
         Gson gson = new Gson();
-        productCodeAvailable = gson.fromJson(responseBody, Reward.class).data().items().getFirst().product_code();
+        reward = gson.fromJson(responseBody, Reward.class);
     }
 }
