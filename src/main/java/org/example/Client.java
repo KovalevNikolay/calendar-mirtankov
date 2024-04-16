@@ -31,13 +31,11 @@ public class Client {
     public void getDailyReward() {
         if (!REWARD.data().items().isEmpty()) {
             String item = REWARD.data().items().getFirst().product_code();
-            StringBuilder requestBody = new StringBuilder();
-            requestBody
-                    .append("{\"product_code\":\"")
-                    .append(item)
-                    .append("\",\"language\":\"ru\",\"transaction_id\":\"")
-                    .append(UUID.randomUUID())
-                    .append("\",\"expected_prices\":[{\"code\":\"gold\",\"amount\":\"0\",\"item_type\":\"currency\"}]}");
+            String requestBody = "{\"product_code\":\"" +
+                    item +
+                    "\",\"language\":\"ru\",\"transaction_id\":\"" +
+                    UUID.randomUUID() +
+                    "\",\"expected_prices\":[{\"code\":\"gold\",\"amount\":\"0\",\"item_type\":\"currency\"}]}";
 
             String uri = "https://tanki.su/wotup/claim_product/purchase_product_vc/";
             String referer = "https://tanki.su/ru/daily-check-in/?utm_campaign=wot-wgcc&utm_medium=link&utm_source=global-nav";
@@ -46,7 +44,7 @@ public class Client {
             HttpRequest request = getRequestWithHeaders()
                     .setHeader("Referer", referer)
                     .uri(URI.create(uri))
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
             try {
