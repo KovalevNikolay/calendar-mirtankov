@@ -93,14 +93,46 @@ public class Client {
     private String toMakeListOfAwards() {
         Calendar calendar = Calendar.getInstance();
         int currentMonth = calendar.get(Calendar.MONTH);
-        int currentYear = calendar.get(Calendar.YEAR) % 100; //2024 -> 24
+        int currentYear = calendar.get(Calendar.YEAR) % 100;
         long currentUnixTime = System.currentTimeMillis() / 1000L;
 
         String[] shortMonths = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
         String replacement = shortMonths[currentMonth] + currentYear;
 
-        String requestPayload = "{\"product_codes\":[\"claim_REPLACE_1\",\"claim_REPLACE_2\",\"claim_REPLACE_3\",\"claim_REPLACE_4\",\"claim_REPLACE_5\",\"claim_REPLACE_6\",\"claim_REPLACE_7\",\"claim_REPLACE_8\",\"claim_REPLACE_9\",\"claim_REPLACE_10\",\"claim_REPLACE_11\",\"claim_REPLACE_12\",\"claim_REPLACE_13\",\"claim_REPLACE_14\",\"claim_REPLACE_15\",\"claim_REPLACE_16\",\"claim_REPLACE_17\",\"claim_REPLACE_18\",\"claim_REPLACE_19\",\"claim_REPLACE_20\",\"claim_REPLACE_21\",\"claim_REPLACE_22\",\"claim_REPLACE_23\",\"claim_REPLACE_24\",\"claim_REPLACE_25\",\"claim_REPLACE_26\",\"claim_REPLACE_27\",\"claim_REPLACE_28\",\"claim_REPLACE_29\",\"claim_REPLACE_30\",\"claim_REPLACE_31\"],\"language\":\"ru\",\"etag\":UNIXTIME}";
-        requestPayload = requestPayload.replace("REPLACE", replacement);
+        String requestPayload = "{\"product_codes\":" +
+                "[\"claim_MONTH_1\"," +
+                "\"claim_MONTH_2\"," +
+                "\"claim_MONTH_3\"," +
+                "\"claim_MONTH_4\"," +
+                "\"claim_MONTH_5\"," +
+                "\"claim_MONTH_6\"," +
+                "\"claim_MONTH_7\"," +
+                "\"claim_MONTH_8\"," +
+                "\"claim_MONTH_9\"," +
+                "\"claim_MONTH_10\"," +
+                "\"claim_MONTH_11\"," +
+                "\"claim_MONTH_12\"," +
+                "\"claim_MONTH_13\"," +
+                "\"claim_MONTH_14\"," +
+                "\"claim_MONTH_15\"," +
+                "\"claim_MONTH_16\"," +
+                "\"claim_MONTH_17\"," +
+                "\"claim_MONTH_18\"," +
+                "\"claim_MONTH_19\"," +
+                "\"claim_MONTH_20\"," +
+                "\"claim_MONTH_21\"," +
+                "\"claim_MONTH_22\"," +
+                "\"claim_MONTH_23\"," +
+                "\"claim_MONTH_24\"," +
+                "\"claim_MONTH_25\"," +
+                "\"claim_MONTH_26\"," +
+                "\"claim_MONTH_27\"," +
+                "\"claim_MONTH_28\"," +
+                "\"claim_MONTH_29\"," +
+                "\"claim_MONTH_30\"," +
+                "\"claim_MONTH_31\"]," +
+                "\"language\":\"ru\",\"etag\":UNIXTIME}";
+        requestPayload = requestPayload.replace("MONTH", replacement);
         requestPayload = requestPayload.replace("UNIXTIME", String.valueOf(currentUnixTime));
 
         return requestPayload;
