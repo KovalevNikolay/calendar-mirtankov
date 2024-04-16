@@ -2,7 +2,6 @@ package org.example;
 
 import com.google.gson.Gson;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -29,7 +28,7 @@ public class Client {
     private final static String SEC_FETCH_SITE = "same-origin";
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 YaBrowser/23.11.0.0 Safari/537.36";
 
-    public void getDailyReward() throws IOException, InterruptedException {
+    public void getDailyReward() {
         if (!REWARD.data().items().isEmpty()) {
             String item = REWARD.data().items().getFirst().product_code();
             StringBuilder requestBody = new StringBuilder();
@@ -50,7 +49,11 @@ public class Client {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            try {
+                client.send(request, HttpResponse.BodyHandlers.ofString());
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
