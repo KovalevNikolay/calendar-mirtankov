@@ -13,12 +13,12 @@ import java.util.Calendar;
 import java.util.UUID;
 
 public class Client {
-    private static Reward REWARD;
+    private Reward reward;
+    private final String cookie;
     private final static String AUTHORITY = "tanki.su";
     private final static String ACCEPT = "application/json,text/javascript,*/*;q=0.01";
     private final static String ACCEPT_LANGUAGE = "ru,en;q=0.9";
     private final static String CONTENT_TYPE = "application/json";
-    private final static String COOKIE;
     private final static String ORIGIN = "https://tanki.su";
     private final static String SEC_CH_UA = "\"Chromium\";v=\"118\", \"YaBrowser\";v=\"23.11\", \"Not=A?Brand\";v=\"99\", \"Yowser\";v=\"2.5\"";
     private final static String SEC_CH_UA_MOBILE = "?0";
@@ -28,9 +28,17 @@ public class Client {
     private final static String SEC_FETCH_SITE = "same-origin";
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 YaBrowser/23.11.0.0 Safari/537.36";
 
+    public Client(String nameCookieFile) {
+        try {
+            this.cookie = Files.readString(Path.of(nameCookieFile));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void getDailyReward() {
-        if (!REWARD.data().items().isEmpty()) {
-            String item = REWARD.data().items().getFirst().product_code();
+        if (!reward.data().items().isEmpty()) {
+            String item = reward.data().items().getFirst().product_code();
             String requestBody = "{\"product_code\":\"" +
                     item +
                     "\",\"language\":\"ru\",\"transaction_id\":\"" +
@@ -70,7 +78,7 @@ public class Client {
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
-                .thenAccept(Client::getProductCode)
+                .thenAccept(this::getProductCode)
                 .join();
     }
 
@@ -80,7 +88,7 @@ public class Client {
                 .setHeader("Accept", ACCEPT)
                 .setHeader("Accept-Language", ACCEPT_LANGUAGE)
                 .setHeader("Content-Type", CONTENT_TYPE)
-                .setHeader("Cookie", COOKIE)
+                .setHeader("Cookie", cookie)
                 .setHeader("Origin", ORIGIN)
                 .setHeader("Sec-Ch-Ua", SEC_CH_UA)
                 .setHeader("Sec-Ch-Ua-Mobile", SEC_CH_UA_MOBILE)
@@ -139,16 +147,7 @@ public class Client {
         return requestPayload;
     }
 
-    static {
-        try {
-            COOKIE = Files.readString(Path.of("cookie.txt"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void getProductCode(String responseBody) {
-        Gson gson = new Gson();
-        REWARD = gson.fromJson(responseBody, Reward.class);
+    private void getProductCode(String responseBody) {
+        this.reward = new Gson().fromJson(responseBody, Reward.class);
     }
 }
