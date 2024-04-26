@@ -28,7 +28,7 @@ public class Client {
     private final static String SEC_FETCH_SITE = "same-origin";
     private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 YaBrowser/23.11.0.0 Safari/537.36";
 
-    public Client(String nameCookieFile) {
+    public Client(final String nameCookieFile) {
         try {
             this.cookie = Files.readString(Path.of(nameCookieFile));
         } catch (IOException e) {
