@@ -43,9 +43,8 @@ public class Client {
         }
 
         if (!reward.data().items().isEmpty()) {
-            String item = reward.data().items().getFirst().product_code();
             String requestBody = "{\"product_code\":\"" +
-                    item +
+                    reward.data().items().getFirst().product_code() +
                     "\",\"language\":\"ru\",\"transaction_id\":\"" +
                     UUID.randomUUID() +
                     "\",\"expected_prices\":[{\"code\":\"gold\",\"amount\":\"0\",\"item_type\":\"currency\"}]}";
@@ -54,11 +53,7 @@ public class Client {
             String referer = "https://tanki.su/ru/daily-check-in/?utm_campaign=wot-wgcc&utm_medium=link&utm_source=global-nav";
             HttpClient client = HttpClient.newHttpClient();
 
-            HttpRequest request = getRequestWithHeaders()
-                    .setHeader("Referer", referer)
-                    .uri(URI.create(uri))
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
+            HttpRequest request = createRequest(uri,referer, requestBody);
 
             try {
                 client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -69,17 +64,12 @@ public class Client {
     }
 
     public void findAnAvailableReward() {
-
-        String payload = toMakeListOfAwards();
+        String requestBody = toMakeListOfAwards();
         String uri = "https://tanki.su/wotup/claim_product/get_products_list/";
         String referer = "https://tanki.su/ru/daily-check-in/?utm_source=global-nav&utm_medium=link&utm_campaign=wot-wgcc";
         HttpClient client = HttpClient.newHttpClient();
 
-        HttpRequest request = getRequestWithHeaders()
-                .setHeader("Referer", referer)
-                .uri(URI.create(uri))
-                .POST(HttpRequest.BodyPublishers.ofString(payload))
-                .build();
+        HttpRequest request = createRequest(uri, referer, requestBody);
 
         client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
@@ -87,7 +77,7 @@ public class Client {
                 .join();
     }
 
-    private HttpRequest.Builder getRequestWithHeaders() {
+    private HttpRequest createRequest(final String uri, final String referer, final String requestBody) {
         return HttpRequest.newBuilder()
                 .setHeader("Authority", AUTHORITY)
                 .setHeader("Accept", ACCEPT)
@@ -101,7 +91,11 @@ public class Client {
                 .setHeader("Sec-Fetch-Dest", SEC_FETCH_DEST)
                 .setHeader("Sec-Fetch-Mode", SEC_FETCH_MODE)
                 .setHeader("Sec-Fetch-Site", SEC_FETCH_SITE)
-                .setHeader("User-Agent", USER_AGENT);
+                .setHeader("User-Agent", USER_AGENT)
+                .setHeader("Referer", referer)
+                .uri(URI.create(uri))
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
     }
 
     private String toMakeListOfAwards() {
@@ -113,7 +107,7 @@ public class Client {
         String[] shortMonths = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
         String replacement = shortMonths[currentMonth] + currentYear;
 
-        String requestPayload = "{\"product_codes\":" +
+        String requestBody = "{\"product_codes\":" +
                 "[\"claim_MONTH_1\"," +
                 "\"claim_MONTH_2\"," +
                 "\"claim_MONTH_3\"," +
@@ -146,10 +140,12 @@ public class Client {
                 "\"claim_MONTH_30\"," +
                 "\"claim_MONTH_31\"]," +
                 "\"language\":\"ru\",\"etag\":UNIXTIME}";
-        requestPayload = requestPayload.replace("MONTH", replacement);
-        requestPayload = requestPayload.replace("UNIXTIME", String.valueOf(currentUnixTime));
 
-        return requestPayload;
+        requestBody = requestBody
+                .replace("MONTH", replacement)
+                .replace("UNIXTIME", String.valueOf(currentUnixTime));
+
+        return requestBody;
     }
 
     private void getProductCode(final String responseBody) {
