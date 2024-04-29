@@ -37,6 +37,11 @@ public class Client {
     }
 
     public void getDailyReward() {
+
+        if(reward == null) {
+            throw new IllegalArgumentException("The session is not valid. Please update the cookie value.");
+        }
+
         if (!reward.data().items().isEmpty()) {
             String item = reward.data().items().getFirst().product_code();
             String requestBody = "{\"product_code\":\"" +
@@ -147,7 +152,7 @@ public class Client {
         return requestPayload;
     }
 
-    private void getProductCode(String responseBody) {
+    private void getProductCode(final String responseBody) {
         this.reward = new Gson().fromJson(responseBody, Reward.class);
     }
 }
