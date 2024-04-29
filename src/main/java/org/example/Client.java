@@ -38,7 +38,7 @@ public class Client {
 
     public void getDailyReward() {
 
-        if(reward == null) {
+        if(reward.data() == null) {
             throw new IllegalArgumentException("The session is not valid. Please update the cookie value.");
         }
 
