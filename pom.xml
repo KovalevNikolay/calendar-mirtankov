@@ -21,7 +21,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.example.CalendarMirTankovApp</mainClass>
+                            <mainClass>ru.kovalev.CalendarMirTankovApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
